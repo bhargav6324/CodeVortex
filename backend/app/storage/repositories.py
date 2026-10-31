@@ -73,7 +73,7 @@ class Drafts(Repository):
             raise RevisionConflict('Draft revision changed')
         if draft.customer_id != current.customer_id or draft.created_at != current.created_at:
             raise RevisionConflict('Draft identity is immutable')
-        allowed = {'ready_for_review': {'ready_for_review', 'approved', 'rejected', 'mock_sent'}, 'blocked': {'ready_for_review', 'rejected'}}
+        allowed = {'ready_for_review': {'ready_for_review', 'blocked', 'approved', 'rejected', 'mock_sent'}, 'blocked': {'ready_for_review', 'blocked', 'rejected'}}
         if draft.status not in allowed.get(current.status, set()):
             raise RevisionConflict('Draft transition is not permitted')
         self.state.drafts[draft.draft_id] = draft.model_copy(deep=True)
@@ -89,7 +89,7 @@ class Reviews(Repository):
             raise RevisionConflict('Review must refer to the committed draft revision')
         if any(r.draft_id == record.draft_id and r.revision == record.revision for r in self.state.reviews.values()):
             raise DuplicateRecord('Draft revision already reviewed')
-        expected = {'edit': {'ready_for_review'}, 'approve': {'approved', 'mock_sent'}, 'reject': {'rejected'}}
+        expected = {'edit': {'ready_for_review', 'blocked'}, 'approve': {'approved', 'mock_sent'}, 'reject': {'rejected'}}
         if draft.status not in expected[record.request.decision]:
             raise RevisionConflict('Reviewer action does not match draft state')
         if record.request.decision == 'approve' and draft.approved_by != record.actor_id:

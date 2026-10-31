@@ -2,7 +2,7 @@
 
 Deployment note: the next SQLite/reviewer implementation is documented in DATABASE_AND_REVIEW.md and TESTER_DATABASE_REVIEW.md. The currently running Phase 3 memory server is deliberately unchanged during the tester's active pass. Statements below describe that Phase 3 baseline; after coordinated SQLite cutover, use the newer review/persistence handoff.
 
-Phase 3 has a recorded local offline result of 85 passing tests. Live AI/Tailscale integration remains pending; see VERIFICATION_STATUS.md. No tests or API checks were rerun for this publication. Startup alone does not establish peer connectivity.
+Phase 3 implementation is ready for the separate tester to verify. No API calls or test suites were run during this phase at the user's request. Startup alone is not proof of connectivity or correctness.
 
 ## Addresses and ownership
 

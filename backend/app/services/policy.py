@@ -13,6 +13,8 @@ VERSION = 'validator_v1'
 VARIABLES = {'display_name', 'tenure_months', 'offer_title', 'offer_terms', 'offer_expiry_date', 'amount_due', 'due_date', 'required_disclaimer', 'support_text'}
 UNSAFE = re.compile(r'https?://|www\.|mailto:|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|\bBearer\s+\S+|\bsk-[A-Za-z0-9_-]{12,}', re.I)
 PHONE = re.compile(r'\b\d{7,}\b')
+NUMBER = re.compile(r'\d+(?:[.,:/-]\d+)*')
+PROMOTION = re.compile(r'\b(?:offers?|vouchers?|rewards?|discounts?|cashback|coupons?|bonus|free)\b', re.I)
 INSTRUCTION = re.compile(r'\b(?:ignore|override)\b.{0,60}\b(?:instructions?|polic(?:y|ies)|rules?)\b|\b(?:system prompt|api key|execute code|reveal secrets?)\b', re.I)
 
 
@@ -198,6 +200,13 @@ class PolicyEngine:
         return result
 
     def render(self, context, policy, plan):
+        template, slots, sources = self.template_slots(context, policy, plan)
+        used = {name for text in (template.subject, template.body) for _, name, _, _ in Formatter().parse(text) if name is not None}
+        message = Message(subject=template.subject.format_map(slots), body=template.body.format_map(slots))
+        evidence = [Evidence(field=sources[name][0], value=sources[name][1]) for name in sorted(used)]
+        return message, evidence
+
+    def template_slots(self, context, policy, plan):
         if plan.strategy is None:
             raise ValueError('No approved strategy')
         if self.policy_findings(policy):
@@ -216,10 +225,7 @@ class PolicyEngine:
             amount = b.amount_due.amount_minor
             slots.update(amount_due='INR %d.%02d' % (amount // 100, amount % 100), due_date=b.due_date)
             sources.update(amount_due=('billing.amount_due.amount_minor', amount), due_date=('billing.due_date', b.due_date))
-        used = {name for text in (template.subject, template.body) for _, name, _, _ in Formatter().parse(text) if name is not None}
-        message = Message(subject=template.subject.format_map(slots), body=template.body.format_map(slots))
-        evidence = [Evidence(field=sources[name][0], value=sources[name][1]) for name in sorted(used)]
-        return message, evidence
+        return template, slots, sources
 
     def validate_message(self, context, policy, now, message, selected_offer_id, template_id, deliveries=()):
         plan = self.evaluate(context, policy, now, deliveries)
@@ -235,6 +241,52 @@ class PolicyEngine:
                 findings.append(finding('POLICY_MISMATCH', 'message', 'Candidate cannot be checked against approved policy.'))
         findings.extend(self.content_findings(message, policy))
         return validation(findings, now)
+
+    def validate_reviewed_message(self, context, policy, now, message, selected_offer_id, template_id, deliveries=()):
+        """Human reviewer text is never refused for wording: text issues are warnings.
+        Customer-level plan checks stay blocking because they gate delivery."""
+        plan = self.evaluate(context, policy, now, deliveries)
+        findings = list(plan.validation.findings)
+        if selected_offer_id != plan.selected_offer_id or plan.strategy is None or template_id != plan.strategy.template_id:
+            findings.append(finding('POLICY_MISMATCH', 'strategy', 'Candidate offer/template does not match the authoritative plan.'))
+        text_findings = []
+        if plan.strategy is not None:
+            try:
+                expected, _ = self.render(context, policy, plan)
+                if normalized(message) != normalized(expected):
+                    text_findings.extend(self.edit_findings(context, policy, plan, message, expected))
+            except (KeyError, ValueError, IndexError, StopIteration):
+                findings.append(finding('POLICY_MISMATCH', 'message', 'Candidate cannot be checked against approved policy.'))
+        text_findings.extend(self.content_findings(message, policy))
+        findings.extend(item.model_copy(update={'severity': 'warning'}) for item in text_findings)
+        digest = message_hash(message)
+        if any(item.content_hash == digest and now - timedelta(days=policy.dedupe_days) <= instant(item.sent_at) <= now for item in deliveries):
+            findings.append(finding('DUPLICATE_OUTREACH', 'message', 'Identical content was already delivered within the exclusion window.'))
+        return validation(findings, now)
+
+    def edit_findings(self, context, policy, plan, message, expected):
+        _, slots, _ = self.template_slots(context, policy, plan)
+        text = '\n'.join(normalized(message).values())
+        required = {'display_name', 'required_disclaimer', 'support_text'}
+        if plan.strategy.objective == 'reward':
+            required |= {'offer_title', 'offer_terms', 'offer_expiry_date'}
+        if plan.strategy.objective == 'payment_reminder':
+            required |= {'amount_due', 'due_date'}
+        result = []
+        for name in sorted(required & slots.keys()):
+            if slots[name] not in text:
+                result.append(finding('POLICY_MISMATCH', 'message', 'Edited text must keep the verified ' + name.replace('_', ' ') + ' exactly as provided.'))
+        allowed = set(NUMBER.findall(expected.subject + '\n' + expected.body))
+        if any(number not in allowed for number in NUMBER.findall(text)):
+            result.append(finding('UNSUPPORTED_CLAIM', 'message', 'Edited text adds a number, amount or date that is not in the verified facts.'))
+        lowered = text.casefold()
+        for offer in context.offers:
+            if offer.offer_id != plan.selected_offer_id and (offer.offer_id.casefold() in lowered or offer.title.casefold() in lowered):
+                result.append(finding('OFFER_INELIGIBLE', 'message', 'Edited text mentions an offer that was not selected for this customer.'))
+                break
+        if plan.strategy.objective == 'payment_reminder' and PROMOTION.search(text):
+            result.append(finding('POLICY_MISMATCH', 'message', 'Payment reminders cannot include promotions.'))
+        return result
 
     def allowed_evidence(self, context, policy):
         facts = {}

@@ -41,6 +41,8 @@ class Settings(ContractModel):
     database_path: str = str(ROOT / "data/codevortex.sqlite3")
     dataset_path: str = str(DEFAULT_DATASET)
     draft_fixture_path: Optional[str] = str(DEFAULT_DRAFTS)
+    rate_limit_generate_per_minute: Annotated[int, Field(ge=1, le=10000)] = 20
+    rate_limit_read_review_per_minute: Annotated[int, Field(ge=1, le=10000)] = 60
 
     @field_validator("backend_tool_token", "ai_service_token", "delegation_signing_secret")
     @classmethod
@@ -95,6 +97,8 @@ def load_settings() -> Settings:
             "database_path": os.environ.get("DATABASE_PATH", str(ROOT / "data/codevortex.sqlite3")),
             "dataset_path": dataset_path,
             "draft_fixture_path": os.environ.get("DRAFT_FIXTURE_PATH", str(DEFAULT_DRAFTS) if dataset_path == str(DEFAULT_DATASET) else "") or None,
+            "rate_limit_generate_per_minute": int(os.environ.get("RATE_LIMIT_GENERATE_PER_MINUTE", "20")),
+            "rate_limit_read_review_per_minute": int(os.environ.get("RATE_LIMIT_READ_REVIEW_PER_MINUTE", "60")),
         })
     except (KeyError, ValueError) as exc:
         # Do not include validation inputs: those may contain credentials.

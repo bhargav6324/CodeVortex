@@ -38,25 +38,31 @@ class ReviewService:
                 if (draft.versions.data_version != context.data_version or draft.versions.policy_version != policy.policy_version or draft.versions.template_version != policy.template_version):
                     raise ApiError(409, 'VERSION_CONFLICT', 'Customer, policy or template version changed; regenerate the draft.')
                 candidate = body.edited_message if body.decision == 'edit' else draft.message
-                if candidate is None or draft.strategy is None:
+                if body.decision == 'approve' and (candidate is None or draft.strategy is None):
                     raise ApiError(422, 'REVIEW_BLOCKED', 'No supported message/strategy is available for this action.')
                 deliveries = uow.deliveries.for_customer(draft.customer_id)
-                checks = self.engine.validate_message(context, policy, now, candidate, draft.selected_offer_id, draft.strategy.template_id, deliveries)
-                if not checks.passed:
+                template_id = draft.strategy.template_id if draft.strategy else None
+                checks = self.engine.validate_reviewed_message(context, policy, now, candidate, draft.selected_offer_id, template_id, deliveries)
+                if body.decision == 'approve' and not checks.passed:
                     details = [{'field': item.field, 'reason': item.code + ': ' + item.message} for item in checks.findings if item.severity == 'block']
                     raise ApiError(422, 'REVIEW_BLOCKED', 'Current safety checks prevent this action; no changes were saved.', details=details)
                 draft.validation = checks
                 if body.decision == 'edit':
-                    # Return the edited revision for inspection; never approve as part of edit.
+                    # Edits always save; text issues are warnings, customer-level blocks keep the draft blocked.
                     plan = self.engine.evaluate(context, policy, now, deliveries)
-                    _, slots = self.engine.render(context, policy, plan)
                     evidence = {item.field: item for segment in plan.segments for item in segment.evidence}
-                    evidence.update({item.field: item for item in slots})
+                    if plan.strategy is not None:
+                        try:
+                            _, slots = self.engine.render(context, policy, plan)
+                            evidence.update({item.field: item for item in slots})
+                        except (KeyError, ValueError, IndexError, StopIteration):
+                            pass
                     draft.message = candidate
                     draft.segments, draft.strategy = plan.segments, plan.strategy
                     draft.selected_offer_id, draft.campaign_key = plan.selected_offer_id, plan.campaign_key
                     draft.evidence = list(evidence.values())[:40]
-                    draft.status, event = 'ready_for_review', 'draft_edited'
+                    draft.status = 'ready_for_review' if checks.passed else 'blocked'
+                    event = 'draft_edited'
                 else:
                     draft.approved_by, draft.approved_at = reviewer.actor_id, timestamp
                     if body.delivery == 'mock_email':

@@ -5,6 +5,7 @@ No transaction may span an AI/network await. Data size is intentionally small;
 this adapter loads staged rows for shared repository logic, not large-scale OLTP.
 """
 from copy import deepcopy
+from datetime import timedelta
 import json
 import os
 from pathlib import Path
@@ -14,7 +15,7 @@ from types import SimpleNamespace
 
 from app.clock import stamp, utc_now
 from app.models import Context, Draft, Offer, Policy
-from app.storage.fixtures import validate_dataset
+from app.storage.fixtures import instant, validate_dataset
 from app.storage.interfaces import DuplicateRecord, RevisionConflict, StorageUnavailable
 from app.storage.records import AuditRecord, IdempotencyRecord, OutboxRecord, ReviewRecord, TurnSnapshot, hash_json
 from app.storage.repositories import State, Contexts, Drafts, Reviews, Deliveries, Audit, Idempotency, Turns
@@ -212,6 +213,39 @@ class SQLiteStorage:
                     values.append(previous.revision)
                 if connection.execute(statement, tuple(values)).rowcount != 1:
                     raise RevisionConflict('Stored record changed during the transaction')
+
+    def purge_expired(self, retention_days, dedupe_days, dry_run=False):
+        """Explicit retention job. Customer contexts and their contact history are kept."""
+        now = self.clock()
+        # Outbox rows back content dedupe, so never purge inside the dedupe window.
+        cutoff = now - timedelta(days=max(retention_days, dedupe_days))
+        connection = self.connect()
+        try:
+            connection.execute('BEGIN IMMEDIATE')
+            counts = {}
+            for table, key_column in (('idempotency', 'scope_key'), ('turns', 'turn_id')):
+                stale = [(key,) for key, expires in connection.execute('SELECT ' + key_column + ',expires_at FROM ' + table) if instant(expires) <= now]
+                connection.executemany('DELETE FROM ' + table + ' WHERE ' + key_column + '=?', stale)
+                counts[table] = len(stale)
+            old = [(draft_id,) for draft_id, payload in connection.execute('SELECT draft_id,payload_json FROM drafts')
+                   if instant(json.loads(payload)['updated_at']) < cutoff]
+            for table in ('reviews', 'outbox', 'audit'):
+                counts[table] = sum(connection.execute('DELETE FROM ' + table + ' WHERE draft_id=?', row).rowcount for row in old)
+            connection.executemany('DELETE FROM drafts WHERE draft_id=?', old)
+            counts['drafts'] = len(old)
+            if dry_run:
+                connection.rollback()
+            else:
+                connection.commit()
+            return counts
+        except sqlite3.Error:
+            connection.rollback()
+            raise StorageUnavailable('Cannot purge persistent storage') from None
+        except BaseException:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
 
     def unit_of_work(self):
         return SQLiteUnitOfWork(self)

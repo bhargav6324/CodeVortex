@@ -2,13 +2,13 @@
 
 Deployment note: the next SQLite/reviewer implementation is documented in DATABASE_AND_REVIEW.md and TESTER_DATABASE_REVIEW.md. The currently running Phase 3 memory server is deliberately unchanged during the tester's active pass. Statements below describe that Phase 3 baseline; after coordinated SQLite cutover, use the newer review/persistence handoff.
 
-A recorded local run passed 85 offline tests (43 earlier + 42 Phase 3). See VERIFICATION_STATUS.md; that result does not establish live AI/Tailscale integration or SQLite/reviewer behavior. No suites or API checks were rerun for this publication.
+The user assigned API verification to a separate tester. The implementation agent did not run API requests, network probes, policy evaluations or test suites for this phase. Only source review and Python syntax parsing were performed. Historical 43-test passes refer to Phases 1–2/dataset connection and must not be reported as Phase 3 results.
 
 ## Review targets
 
 Policy: app/services/policy.py. Immutable scoped turns: app/storage/records.py and memory.py. Tool dispatch: app/services/tools.py. Draft orchestration and idempotency: app/services/generation.py. Real peer transport: app/services/ai_client.py. Endpoint shapes remain frozen at 1.0.0.
 
-The default API fixture injects an offline AI adapter and fixed dataset clock to avoid unintended provider calls. tests/test_phase3.py supplies the new Phase 3 coverage. The unregistered-turn expectation is now 403. Additional live integration and SQLite/reviewer verification belongs to the separate tester.
+The tests/ directory was not executed. Its default API fixture now injects an offline AI adapter and a fixed dataset clock to avoid unintended provider calls. The historical signed-but-unregistered-turn assertion was updated from the Phase 1 placeholder 503 to the implemented 403. The tester owns adding/executing new Phase 3 coverage; no passing count is claimed here.
 
 ## Functional cases to verify
 

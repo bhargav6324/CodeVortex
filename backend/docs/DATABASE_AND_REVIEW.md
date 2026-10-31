@@ -17,7 +17,7 @@ The adapter stages the small dataset in memory per short transaction and persist
 The setup command creates the actual database and imports seed records once. It is not a policy or API test:
 
 ```sh
-cd backend
+cd /Users/bhargavpatil/backend
 .venv/bin/python scripts/init_database.py --database data/codevortex.sqlite3 --dataset data/dataset.json
 ```
 

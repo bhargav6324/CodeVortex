@@ -20,6 +20,7 @@ from app.services.tools import ToolService
 from app.services.ai_client import AIClient, HTTPAIClient
 from app.services.generation import GenerationService
 from app.services.review import ReviewService
+from app.ratelimit import RateLimiter
 
 ResourceID = Annotated[str, Path(pattern=ID_PATTERN)]
 ERROR_RESPONSES = {code: {"model": Error} for code in (401, 403, 404, 409, 422, 429, 500, 503, 504)}
@@ -27,6 +28,17 @@ ERROR_RESPONSES = {code: {"model": Error} for code in (401, 403, 404, 409, 422, 
 
 def unavailable(message):
     raise ApiError(503, "SERVICE_UNAVAILABLE", message, retryable=True)
+
+
+def limited(bucket):
+    def dependency(request: Request, reviewer: Reviewer = Depends(require_reviewer)) -> Reviewer:
+        request.app.state.rate_limiter.check(reviewer.actor_id, bucket)
+        return reviewer
+    return dependency
+
+
+generate_limit = limited("generate")
+read_review_limit = limited("read_review")
 
 
 def create_app(settings: Settings = None, storage: Optional[Storage] = None, ai_client: Optional[AIClient] = None, clock: Callable = utc_now) -> FastAPI:
@@ -46,6 +58,8 @@ def create_app(settings: Settings = None, storage: Optional[Storage] = None, ai_
             dataset, drafts = load_fixtures(fixture_path(config.dataset_path), fixture_path(config.draft_fixture_path) if config.draft_fixture_path else None)
             storage = MemoryStorage(dataset, drafts, clock=clock)
     app.state.storage = storage
+    app.state.rate_limiter = RateLimiter({"generate": app.state.settings.rate_limit_generate_per_minute,
+                                          "read_review": app.state.settings.rate_limit_read_review_per_minute})
     engine = PolicyEngine()
     ai_adapter = ai_client if ai_client is not None else HTTPAIClient(app.state.settings)
     register_error_handlers(app)
@@ -62,13 +76,13 @@ def create_app(settings: Settings = None, storage: Optional[Storage] = None, ai_
         return Health(status="ok", service="backend", contract_version="1.0.0")
 
     @app.get("/api/v1/customers/{customer_id}/context", response_model=Context, responses=ERROR_RESPONSES)
-    def customer_context(customer_id: ResourceID, reviewer: Reviewer = Depends(require_reviewer), storage: Storage = Depends(get_storage)):
+    def customer_context(customer_id: ResourceID, reviewer: Reviewer = Depends(read_review_limit), storage: Storage = Depends(get_storage)):
         authorize_customer(reviewer, customer_id)
         with storage.unit_of_work() as uow:
             return uow.contexts.get(customer_id)
 
     @app.post("/api/v1/drafts", response_model=Draft, status_code=201, responses={**ERROR_RESPONSES, 200: {"model": Draft}})
-    async def create_draft(body: DraftRequest, request: Request, response: Response, reviewer: Reviewer = Depends(require_reviewer), key: str = Depends(require_idempotency), storage: Storage = Depends(get_storage)):
+    async def create_draft(body: DraftRequest, request: Request, response: Response, reviewer: Reviewer = Depends(generate_limit), key: str = Depends(require_idempotency), storage: Storage = Depends(get_storage)):
         authorize_customer(reviewer, body.customer_id)
         service = GenerationService(storage, engine, ai_adapter, app.state.settings, clock)
         draft, status = await service.create(body, reviewer, key, request.state.request_id)
@@ -76,14 +90,14 @@ def create_app(settings: Settings = None, storage: Optional[Storage] = None, ai_
         return draft
 
     @app.get("/api/v1/drafts/{draft_id}", response_model=Draft, responses=ERROR_RESPONSES)
-    def get_draft(draft_id: ResourceID, reviewer: Reviewer = Depends(require_reviewer), storage: Storage = Depends(get_storage)):
+    def get_draft(draft_id: ResourceID, reviewer: Reviewer = Depends(read_review_limit), storage: Storage = Depends(get_storage)):
         with storage.unit_of_work() as uow:
             draft = uow.drafts.get(draft_id)
         authorize_customer(reviewer, draft.customer_id)
         return draft
 
     @app.post("/api/v1/drafts/{draft_id}/review", response_model=Draft, responses=ERROR_RESPONSES)
-    def review_draft(draft_id: ResourceID, body: ReviewRequest, request: Request, reviewer: Reviewer = Depends(require_reviewer), key: str = Depends(require_idempotency), storage: Storage = Depends(get_storage)):
+    def review_draft(draft_id: ResourceID, body: ReviewRequest, request: Request, reviewer: Reviewer = Depends(read_review_limit), key: str = Depends(require_idempotency), storage: Storage = Depends(get_storage)):
         if app.state.settings.storage_backend != "sqlite":
             # Keep the current memory-only testing deployment read-only for review.
             with storage.unit_of_work() as uow:

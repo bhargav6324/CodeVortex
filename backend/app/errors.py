@@ -8,12 +8,13 @@ from app.storage.interfaces import DuplicateRecord, IdempotencyConflict, Missing
 
 
 class ApiError(Exception):
-    def __init__(self, status, code, message, *, retryable=False, details=None):
+    def __init__(self, status, code, message, *, retryable=False, details=None, retry_after=None):
         self.status = status
         self.code = code
         self.message = message
         self.retryable = retryable
         self.details = details or []
+        self.retry_after = retry_after
 
 
 def error_response(error: ApiError, request_id: str):
@@ -25,6 +26,8 @@ def error_response(error: ApiError, request_id: str):
     headers = {"WWW-Authenticate": "Bearer"} if error.status == 401 else {}
     if error.code == "VERSION_CONFLICT" and error.retryable:
         headers["Retry-After"] = "1"
+    if error.retry_after is not None:
+        headers["Retry-After"] = str(error.retry_after)
     return JSONResponse(status_code=error.status, content=body.model_dump(mode="json"), headers=headers)
 
 

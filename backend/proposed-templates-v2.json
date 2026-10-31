@@ -1,0 +1,37 @@
+[
+  {
+    "template_id": "reward_v2",
+    "objective": "reward",
+    "tone": "warm",
+    "subject": "A thank-you reward for your loyalty",
+    "body": "Hello {display_name},\n\nThank you for being with us for {tenure_months} months. As a thank-you, you are eligible for our {offer_title}.\n\nOffer details: {offer_terms}\nOffer expires: {offer_expiry_date}\n\n{support_text}\n\nWarm regards,\nCustomer Care Team\n\n{required_disclaimer}"
+  },
+  {
+    "template_id": "appreciation_v2",
+    "objective": "appreciation",
+    "tone": "warm",
+    "subject": "Thank you for staying with us",
+    "body": "Hello {display_name},\n\nThank you for staying engaged with us. We truly appreciate having you as a customer.\n\n{support_text}\n\nWarm regards,\nCustomer Care Team\n\n{required_disclaimer}"
+  },
+  {
+    "template_id": "reengagement_v2",
+    "objective": "reengagement",
+    "tone": "encouraging",
+    "subject": "We would like to hear from you",
+    "body": "Hello {display_name},\n\nWe would like to help you get more from your current plan. Our support team can walk you through the options available to you.\n\n{support_text}\n\nWarm regards,\nCustomer Care Team\n\n{required_disclaimer}"
+  },
+  {
+    "template_id": "courteous_v2",
+    "objective": "payment_reminder",
+    "tone": "courteous",
+    "subject": "A friendly reminder about your bill",
+    "body": "Hello {display_name},\n\nThis is a friendly reminder about your bill.\n\nAmount due: {amount_due}\nDue date: {due_date}\n\nIf you have already paid, please ignore this message. If you would like to dispute this bill, please contact support.\n\n{support_text}\n\nKind regards,\nCustomer Care Team\n\n{required_disclaimer}"
+  },
+  {
+    "template_id": "firm_v2",
+    "objective": "payment_reminder",
+    "tone": "firm_respectful",
+    "subject": "Please review your overdue bill",
+    "body": "Hello {display_name},\n\nOur verified records show that your bill remains overdue.\n\nAmount due: {amount_due}\nDue date: {due_date}\n\nPlease review your bill at your earliest convenience. If you need help, have already paid, or wish to dispute the amount, please contact support.\n\n{support_text}\n\nRegards,\nCustomer Care Team\n\n{required_disclaimer}"
+  }
+]
