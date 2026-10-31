@@ -1,0 +1,13 @@
+{
+  "tool": "validate_draft",
+  "turn_id": "TURN001",
+  "arguments": {
+    "customer_id": "CUST001",
+    "message": {
+      "subject": "Thank you for your loyalty",
+      "body": "Hello Asha,\nThank you for being with us for 18 months. You are eligible for our Loyalty reward: INR 100 reward voucher. Valid for one redemption. No cash alternative. Offer expires 2026-11-30.\nTerms apply. This is a draft for human review.\nContact support for questions or billing disputes."
+    },
+    "selected_offer_id": "OFFER100",
+    "template_id": "reward_v1"
+  }
+}
