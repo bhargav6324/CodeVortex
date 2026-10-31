@@ -10,3 +10,9 @@
 *.db
 *.sqlite*
 /backend/data/
+**/.DS_Store
+**/.mypy_cache/
+**/.ruff_cache/
+**/.coverage
+*.db-wal
+*.db-shm

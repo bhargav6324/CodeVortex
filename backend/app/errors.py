@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
 from app.models import Error
-from app.storage.interfaces import DuplicateRecord, IdempotencyConflict, MissingRecord, OperationInProgress, RevisionConflict
+from app.storage.interfaces import DuplicateRecord, IdempotencyConflict, MissingRecord, OperationInProgress, RevisionConflict, StorageUnavailable
 
 
 class ApiError(Exception):
@@ -29,6 +29,10 @@ def error_response(error: ApiError, request_id: str):
 
 
 def register_error_handlers(app):
+    @app.exception_handler(StorageUnavailable)
+    async def storage_unavailable(request: Request, exc: StorageUnavailable):
+        return error_response(ApiError(503, "SERVICE_UNAVAILABLE", "Persistent storage is busy or unavailable.", retryable=True), request.state.request_id)
+
     @app.exception_handler(MissingRecord)
     async def missing_record(request: Request, exc: MissingRecord):
         return error_response(ApiError(404, "NOT_FOUND", "Resource not found."), request.state.request_id)

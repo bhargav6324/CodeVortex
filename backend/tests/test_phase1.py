@@ -120,7 +120,7 @@ def test_tools_service_auth_and_scope(client, settings, reviewer_headers):
     headers = {"Authorization": "Bearer " + settings.backend_tool_token.get_secret_value()}
     assert_error(client.post("/internal/v1/tools/execute", json=body, headers=headers), 403, "FORBIDDEN")
     headers["X-Delegation-Token"] = delegation(settings)
-    assert_error(client.post("/internal/v1/tools/execute", json=body, headers=headers), 503, "SERVICE_UNAVAILABLE")
+    assert_error(client.post("/internal/v1/tools/execute", json=body, headers=headers), 403, "FORBIDDEN")
     assert_error(client.post("/internal/v1/tools/execute", json=dict(body, turn_id="TURN999"), headers=headers), 403, "FORBIDDEN")
     assert_error(client.post("/internal/v1/tools/execute", json=dict(body, tool="send_email"), headers=headers), 422, "INVALID_REQUEST")
     for token in ["invalid", delegation(settings) + "changed", delegation(settings, issued_at=int(time.time()) - 120, expires_at=int(time.time()) - 60), delegation(settings, expires_at=int(time.time()) + 120)]:

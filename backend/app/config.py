@@ -1,11 +1,11 @@
 import json
 import os
 from pathlib import Path
-from typing import List, Literal, Optional
+from typing import Annotated, List, Literal, Optional
 from urllib.parse import urlparse
 
 from dotenv import load_dotenv
-from pydantic import SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator
 
 from app.models import ContractModel, UTCString
 
@@ -16,9 +16,9 @@ DEFAULT_DRAFTS = ROOT / "fixtures/drafts.json"
 
 class Reviewer(ContractModel):
     token: SecretStr
-    actor_id: str
+    actor_id: Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")]
     role: str
-    customer_ids: List[str]
+    customer_ids: List[Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")]]
     expires_at: UTCString
 
     @field_validator("role")
@@ -37,7 +37,8 @@ class Settings(ContractModel):
     delegation_signing_secret: SecretStr
     reviewers: List[Reviewer]
     delivery_mode: str
-    storage_backend: Literal["memory"] = "memory"
+    storage_backend: Literal["memory", "sqlite"] = "memory"
+    database_path: str = str(ROOT / "data/codevortex.sqlite3")
     dataset_path: str = str(DEFAULT_DATASET)
     draft_fixture_path: Optional[str] = str(DEFAULT_DRAFTS)
 
@@ -91,6 +92,7 @@ def load_settings() -> Settings:
             "reviewers": json.loads(os.environ["REVIEWERS_JSON"]),
             "delivery_mode": os.environ["DELIVERY_MODE"],
             "storage_backend": os.environ.get("STORAGE_BACKEND", "memory"),
+            "database_path": os.environ.get("DATABASE_PATH", str(ROOT / "data/codevortex.sqlite3")),
             "dataset_path": dataset_path,
             "draft_fixture_path": os.environ.get("DRAFT_FIXTURE_PATH", str(DEFAULT_DRAFTS) if dataset_path == str(DEFAULT_DATASET) else "") or None,
         })

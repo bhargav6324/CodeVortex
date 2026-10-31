@@ -1,4 +1,6 @@
 import time
+import json
+from pathlib import Path
 from datetime import datetime, timezone
 
 import pytest
@@ -6,6 +8,8 @@ from fastapi.testclient import TestClient
 
 from app.config import Settings
 from app.main import create_app
+from app.errors import ApiError
+from app.storage.fixtures import instant
 
 
 @pytest.fixture
@@ -23,9 +27,17 @@ def settings():
     })
 
 
+class OfflineAIClient:
+    async def generate(self, request, delegation, request_id):
+        raise ApiError(503, "SERVICE_UNAVAILABLE", "Offline AI adapter for the tester harness.", retryable=True)
+
+
 @pytest.fixture
 def client(settings):
-    with TestClient(create_app(settings)) as value:
+    # Tester-owned suite must not contact the live AI service or depend on wall time.
+    raw = json.loads((Path(__file__).resolve().parents[1] / "fixtures/dataset.json").read_text())
+    reference = instant(raw["as_of"])
+    with TestClient(create_app(settings, ai_client=OfflineAIClient(), clock=lambda: reference)) as value:
         yield value
 
 

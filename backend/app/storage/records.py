@@ -5,7 +5,7 @@ from typing import Annotated, Literal, Optional
 
 from pydantic import Field
 
-from app.models import ContractModel, Draft, Message, ReviewRequest, UTCString
+from app.models import AIRequest, ContractModel, Draft, Message, Plan, ReviewRequest, UTCString, Validation
 
 Identifier = Annotated[str, Field(pattern=r'^[A-Za-z0-9_-]{1,64}$')]
 ContentHash = Annotated[str, Field(pattern=r'^[a-f0-9]{64}$')]
@@ -67,3 +67,13 @@ def hash_json(value: dict) -> str:
 
 def message_hash(message: Message) -> str:
     return hash_json({key: value.replace('\r\n', '\n').strip() for key, value in message.model_dump().items()})
+
+
+class TurnSnapshot(ContractModel):
+    request: AIRequest
+    plan: Plan
+    expires_at: UTCString
+    evaluated: bool = False
+    validated: bool = False
+    candidate_hash: Optional[ContentHash] = None
+    candidate_validation: Optional[Validation] = None

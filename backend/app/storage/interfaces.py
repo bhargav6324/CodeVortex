@@ -2,7 +2,11 @@
 from typing import ContextManager, List, Protocol
 
 from app.models import Context, Draft, Policy
-from app.storage.records import AuditRecord, IdempotencyRecord, IdempotencyScope, OutboxRecord, ReviewRecord
+from app.storage.records import AuditRecord, IdempotencyRecord, IdempotencyScope, OutboxRecord, ReviewRecord, TurnSnapshot
+
+
+class StorageUnavailable(Exception):
+    pass
 
 
 class MissingRecord(Exception):
@@ -57,7 +61,15 @@ class IdempotencyRepository(Protocol):
     def release(self, scope: IdempotencyScope, request_hash: str) -> None: ...
 
 
+class TurnRepository(Protocol):
+    def add(self, snapshot: TurnSnapshot) -> None: ...
+    def get(self, turn_id: str) -> TurnSnapshot: ...
+    def replace(self, snapshot: TurnSnapshot) -> None: ...
+    def delete(self, turn_id: str) -> None: ...
+
+
 class UnitOfWork(Protocol):
+    turns: TurnRepository
     contexts: ContextRepository
     drafts: DraftRepository
     reviews: ReviewRepository
