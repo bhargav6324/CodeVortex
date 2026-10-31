@@ -1,0 +1,14 @@
+{
+  "error": {
+    "code": "REVIEW_BLOCKED",
+    "message": "Current consent does not allow this outreach.",
+    "request_id": "REQ002",
+    "retryable": false,
+    "details": [
+      {
+        "field": "consent.marketing_opt_in",
+        "reason": "CONSENT_REQUIRED"
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "tool": "evaluate_customer",
+  "turn_id": "TURN001",
+  "arguments": {
+    "customer_id": "CUST001"
+  }
+}

@@ -16,3 +16,19 @@
 **/.coverage
 *.db-wal
 *.db-shm
+
+# Python packaging
+*.egg-info/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+
+# Office lock files
+~$*
+
+# AI service: telemetry, server log, private backend-supplied evaluation data
+logs/
+logs-*.txt
+ai-service/eval-data/
