@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:codevortex:loyalty:1.1.0-ext",
+  "$comment": "PROPOSED additive extension to shared contract v1.0.0 (see contracts/PROPOSAL_v1.1.0.md). Not frozen until the team approves it. Reuses v1.0.0 definitions by reference.",
+  "$defs": {
+    "Score": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "HealthV11": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "service",
+        "contract_version"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "service": {
+          "type": "string",
+          "enum": [
+            "backend"
+          ]
+        },
+        "contract_version": {
+          "type": "string",
+          "enum": [
+            "1.0.0",
+            "1.1.0"
+          ]
+        }
+      }
+    },
+    "RatingRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_revision",
+        "relevance",
+        "clarity",
+        "personalization",
+        "call_to_action",
+        "tone",
+        "comment"
+      ],
+      "properties": {
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "relevance": {
+          "$ref": "#/$defs/Score"
+        },
+        "clarity": {
+          "$ref": "#/$defs/Score"
+        },
+        "personalization": {
+          "$ref": "#/$defs/Score"
+        },
+        "call_to_action": {
+          "$ref": "#/$defs/Score"
+        },
+        "tone": {
+          "$ref": "#/$defs/Score"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Rating": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rating_id",
+        "draft_id",
+        "revision",
+        "rated_by",
+        "rated_at",
+        "relevance",
+        "clarity",
+        "personalization",
+        "call_to_action",
+        "tone",
+        "comment"
+      ],
+      "properties": {
+        "rating_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "draft_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rated_by": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "rated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "relevance": {
+          "$ref": "#/$defs/Score"
+        },
+        "clarity": {
+          "$ref": "#/$defs/Score"
+        },
+        "personalization": {
+          "$ref": "#/$defs/Score"
+        },
+        "call_to_action": {
+          "$ref": "#/$defs/Score"
+        },
+        "tone": {
+          "$ref": "#/$defs/Score"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "AuditEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "draft_id",
+        "revision",
+        "event_type",
+        "actor_id",
+        "request_id",
+        "at",
+        "summary",
+        "evidence_fields"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "draft_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "draft_created",
+            "draft_blocked",
+            "edited",
+            "approved",
+            "mock_sent",
+            "rejected",
+            "rated"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "evidence_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 40
+        }
+      }
+    },
+    "OutboxEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delivery_id",
+        "draft_id",
+        "customer_id",
+        "campaign_key",
+        "channel",
+        "delivery",
+        "subject",
+        "body",
+        "content_hash",
+        "delivered_at"
+      ],
+      "properties": {
+        "delivery_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "draft_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "customer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "campaign_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "email"
+          ]
+        },
+        "delivery": {
+          "type": "string",
+          "enum": [
+            "mock_email"
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "delivered_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "DraftDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "draft_id",
+        "revision",
+        "eligibility",
+        "audit",
+        "outbox",
+        "ratings"
+      ],
+      "properties": {
+        "draft_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "eligibility": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:codevortex:loyalty:1.0.0#/$defs/Eligibility"
+          },
+          "maxItems": 20
+        },
+        "audit": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AuditEvent"
+          },
+          "maxItems": 200
+        },
+        "outbox": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OutboxEntry"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ratings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Rating"
+          },
+          "maxItems": 100
+        }
+      }
+    }
+  }
+}

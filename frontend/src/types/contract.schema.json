@@ -1,0 +1,1553 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:codevortex:loyalty:1.0.0",
+  "$defs": {
+    "Money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amount_minor",
+        "currency"
+      ],
+      "properties": {
+        "amount_minor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "INR"
+          ]
+        }
+      }
+    },
+    "Message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "body"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000
+        }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "value"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "Segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "reason_codes",
+        "confidence",
+        "evidence"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "consistent",
+            "loyalty_candidate",
+            "declining_activity",
+            "dormant",
+            "payment_reminder"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "TIMELY_PAYMENT",
+              "LOYALTY_THRESHOLD",
+              "ACTIVITY_DECLINED",
+              "NO_RECENT_ACTIVITY",
+              "VERIFIED_OVERDUE"
+            ]
+          },
+          "maxItems": 5
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 20
+        }
+      }
+    },
+    "Strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objective",
+        "tone",
+        "template_id",
+        "reminder_stage"
+      ],
+      "properties": {
+        "objective": {
+          "type": "string",
+          "enum": [
+            "appreciation",
+            "reward",
+            "reengagement",
+            "payment_reminder"
+          ]
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "warm",
+            "encouraging",
+            "courteous",
+            "firm_respectful"
+          ]
+        },
+        "template_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "reminder_stage": {
+          "type": "string",
+          "enum": [
+            "none",
+            "courteous",
+            "firm"
+          ]
+        }
+      }
+    },
+    "Finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "field",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "MISSING_EVIDENCE",
+            "CONTRADICTORY_DATA",
+            "CONSENT_REQUIRED",
+            "CHANNEL_BLOCKED",
+            "CONTACT_FREQUENCY",
+            "DUPLICATE_OUTREACH",
+            "OFFER_INELIGIBLE",
+            "OFFER_EXPIRED",
+            "OFFER_TERMS_MISMATCH",
+            "BILLING_UNVERIFIED",
+            "BILLING_DISPUTED",
+            "UNSUPPORTED_CLAIM",
+            "PROHIBITED_LANGUAGE",
+            "SENSITIVE_DATA",
+            "POLICY_MISMATCH",
+            "MODEL_UNAVAILABLE",
+            "HUMAN_APPROVAL_REQUIRED"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "block",
+            "warning"
+          ]
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "Validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "passed",
+        "findings",
+        "checked_at",
+        "validator_version"
+      ],
+      "properties": {
+        "passed": {
+          "type": "boolean"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "maxItems": 30
+        },
+        "checked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validator_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        }
+      }
+    },
+    "Offer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offer_id",
+        "title",
+        "terms",
+        "terms_version",
+        "value",
+        "valid_from",
+        "expires_at",
+        "channel",
+        "min_loyalty_points",
+        "min_tenure_months",
+        "allowed_plans",
+        "requires_marketing_consent"
+      ],
+      "properties": {
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "terms": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "terms_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "value": {
+          "$ref": "#/$defs/Money"
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "email"
+          ]
+        },
+        "min_loyalty_points": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_tenure_months": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allowed_plans": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$"
+          },
+          "maxItems": 20
+        },
+        "requires_marketing_consent": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Customer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "customer_id",
+        "display_name",
+        "active_plan",
+        "tenure_months",
+        "loyalty_points",
+        "activity_current_30d",
+        "activity_previous_30d",
+        "last_activity_at",
+        "timely_payments_last_3"
+      ],
+      "properties": {
+        "customer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "active_plan": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "tenure_months": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "loyalty_points": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "activity_current_30d": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "activity_previous_30d": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_activity_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timely_payments_last_3": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "email_allowed",
+        "marketing_opt_in",
+        "service_email_allowed",
+        "recorded_at",
+        "source"
+      ],
+      "properties": {
+        "email_allowed": {
+          "type": "boolean"
+        },
+        "marketing_opt_in": {
+          "type": "boolean"
+        },
+        "service_email_allowed": {
+          "type": "boolean"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    },
+    "Billing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bill_id",
+        "status",
+        "amount_due",
+        "due_date",
+        "verified_at",
+        "dispute_open",
+        "support_text"
+      ],
+      "properties": {
+        "bill_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "paid",
+            "current",
+            "overdue",
+            "disputed",
+            "unknown"
+          ]
+        },
+        "amount_due": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "due_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verified_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dispute_open": {
+          "type": "boolean"
+        },
+        "support_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      }
+    },
+    "Contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contact_id",
+        "customer_id",
+        "campaign_key",
+        "channel",
+        "sent_at",
+        "delivery"
+      ],
+      "properties": {
+        "contact_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "customer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "campaign_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "email"
+          ]
+        },
+        "sent_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "delivery": {
+          "type": "string",
+          "enum": [
+            "mock_email"
+          ]
+        }
+      }
+    },
+    "Context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "customer",
+        "consent",
+        "billing",
+        "contacts",
+        "offers",
+        "data_version",
+        "as_of"
+      ],
+      "properties": {
+        "customer": {
+          "$ref": "#/$defs/Customer"
+        },
+        "consent": {
+          "$ref": "#/$defs/Consent"
+        },
+        "billing": {
+          "$ref": "#/$defs/Billing"
+        },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Contact"
+          },
+          "maxItems": 100
+        },
+        "offers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Offer"
+          },
+          "maxItems": 20
+        },
+        "data_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_version",
+        "template_version",
+        "loyalty_points_threshold",
+        "loyalty_tenure_months",
+        "decline_ratio",
+        "dormant_days",
+        "firm_after_days",
+        "max_contacts_7d",
+        "dedupe_days",
+        "billing_max_age_hours",
+        "required_disclaimer",
+        "blocked_phrases",
+        "templates"
+      ],
+      "properties": {
+        "policy_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "template_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "loyalty_points_threshold": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "loyalty_tenure_months": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "decline_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "dormant_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "firm_after_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_contacts_7d": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dedupe_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "billing_max_age_hours": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "required_disclaimer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "blocked_phrases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "templates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "template_id",
+              "objective",
+              "tone",
+              "subject",
+              "body"
+            ],
+            "properties": {
+              "template_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$"
+              },
+              "objective": {
+                "type": "string",
+                "enum": [
+                  "appreciation",
+                  "reward",
+                  "reengagement",
+                  "payment_reminder"
+                ]
+              },
+              "tone": {
+                "type": "string",
+                "enum": [
+                  "warm",
+                  "encouraging",
+                  "courteous",
+                  "firm_respectful"
+                ]
+              },
+              "subject": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "body": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 5000
+              }
+            }
+          },
+          "maxItems": 10
+        }
+      }
+    },
+    "Eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offer_id",
+        "eligible",
+        "reason_codes"
+      ],
+      "properties": {
+        "offer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ELIGIBLE",
+              "NO_MARKETING_CONSENT",
+              "PLAN_NOT_ALLOWED",
+              "LOW_LOYALTY",
+              "LOW_TENURE",
+              "OFFER_NOT_ACTIVE",
+              "BILLING_PRIORITY"
+            ]
+          },
+          "maxItems": 10
+        }
+      }
+    },
+    "Plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "segments",
+        "strategy",
+        "selected_offer_id",
+        "eligibility",
+        "validation",
+        "campaign_key"
+      ],
+      "properties": {
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "maxItems": 5
+        },
+        "strategy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Strategy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_offer_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "eligibility": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Eligibility"
+          },
+          "maxItems": 20
+        },
+        "validation": {
+          "$ref": "#/$defs/Validation"
+        },
+        "campaign_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        }
+      }
+    },
+    "Versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_version",
+        "template_version",
+        "prompt_version",
+        "model_version",
+        "data_version"
+      ],
+      "properties": {
+        "policy_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "template_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "prompt_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "data_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        }
+      }
+    },
+    "DraftRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "customer_id",
+        "channel",
+        "locale"
+      ],
+      "properties": {
+        "customer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "email"
+          ]
+        },
+        "locale": {
+          "type": "string",
+          "enum": [
+            "en-IN"
+          ]
+        }
+      }
+    },
+    "Draft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "draft_id",
+        "customer_id",
+        "revision",
+        "status",
+        "segments",
+        "strategy",
+        "selected_offer_id",
+        "message",
+        "evidence",
+        "validation",
+        "versions",
+        "campaign_key",
+        "created_at",
+        "updated_at",
+        "approved_by",
+        "approved_at",
+        "send_status",
+        "delivery_id",
+        "feedback",
+        "request_id"
+      ],
+      "properties": {
+        "draft_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "customer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready_for_review",
+            "blocked",
+            "approved",
+            "rejected",
+            "mock_sent"
+          ]
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "maxItems": 5
+        },
+        "strategy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Strategy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_offer_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Message"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 40
+        },
+        "validation": {
+          "$ref": "#/$defs/Validation"
+        },
+        "versions": {
+          "$ref": "#/$defs/Versions"
+        },
+        "campaign_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "approved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "send_status": {
+          "type": "string",
+          "enum": [
+            "not_sent",
+            "draft_only",
+            "mock_sent"
+          ]
+        },
+        "delivery_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "feedback": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        }
+      }
+    },
+    "ReviewRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_revision",
+        "decision",
+        "edited_message",
+        "feedback",
+        "delivery"
+      ],
+      "properties": {
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "edit",
+            "approve",
+            "reject"
+          ]
+        },
+        "edited_message": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Message"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "feedback": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delivery": {
+          "type": "string",
+          "enum": [
+            "draft_only",
+            "mock_email"
+          ]
+        }
+      }
+    },
+    "Health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "service",
+        "contract_version"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok"
+          ]
+        },
+        "service": {
+          "type": "string",
+          "enum": [
+            "backend"
+          ]
+        },
+        "contract_version": {
+          "type": "string",
+          "enum": [
+            "1.0.0"
+          ]
+        }
+      }
+    },
+    "AIRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "turn_id",
+        "customer_id",
+        "as_of",
+        "context",
+        "policy",
+        "locale"
+      ],
+      "properties": {
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "customer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "context": {
+          "$ref": "#/$defs/Context"
+        },
+        "policy": {
+          "$ref": "#/$defs/Policy"
+        },
+        "locale": {
+          "type": "string",
+          "enum": [
+            "en-IN"
+          ]
+        }
+      }
+    },
+    "AIResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "turn_id",
+        "plan",
+        "message",
+        "evidence",
+        "generation_status",
+        "prompt_version",
+        "model_version"
+      ],
+      "properties": {
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "plan": {
+          "$ref": "#/$defs/Plan"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Message"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 40
+        },
+        "generation_status": {
+          "type": "string",
+          "enum": [
+            "generated",
+            "blocked",
+            "unavailable"
+          ]
+        },
+        "prompt_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "EvaluateToolRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "turn_id",
+        "arguments"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "enum": [
+            "evaluate_customer"
+          ]
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "customer_id"
+          ],
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            }
+          }
+        }
+      }
+    },
+    "ValidateToolRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "turn_id",
+        "arguments"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "enum": [
+            "validate_draft"
+          ]
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "customer_id",
+            "message",
+            "selected_offer_id",
+            "template_id"
+          ],
+          "properties": {
+            "customer_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            },
+            "message": {
+              "$ref": "#/$defs/Message"
+            },
+            "selected_offer_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{1,64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "template_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            }
+          }
+        }
+      }
+    },
+    "ToolRequest": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EvaluateToolRequest"
+        },
+        {
+          "$ref": "#/$defs/ValidateToolRequest"
+        }
+      ]
+    },
+    "EvaluateToolResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "turn_id",
+        "result"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "enum": [
+            "evaluate_customer"
+          ]
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "result": {
+          "$ref": "#/$defs/Plan"
+        }
+      }
+    },
+    "ValidateToolResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "turn_id",
+        "result"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "enum": [
+            "validate_draft"
+          ]
+        },
+        "turn_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}$"
+        },
+        "result": {
+          "$ref": "#/$defs/Validation"
+        }
+      }
+    },
+    "ToolResponse": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EvaluateToolResponse"
+        },
+        {
+          "$ref": "#/$defs/ValidateToolResponse"
+        }
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "request_id",
+            "retryable",
+            "details"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "UNAUTHORIZED",
+                "FORBIDDEN",
+                "NOT_FOUND",
+                "INVALID_REQUEST",
+                "IDEMPOTENCY_CONFLICT",
+                "VERSION_CONFLICT",
+                "REVIEW_BLOCKED",
+                "INVALID_TRANSITION",
+                "RATE_LIMITED",
+                "AI_TIMEOUT",
+                "SERVICE_UNAVAILABLE",
+                "INTERNAL_ERROR"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "request_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            },
+            "retryable": {
+              "type": "boolean"
+            },
+            "details": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "field",
+                  "reason"
+                ],
+                "properties": {
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                }
+              },
+              "maxItems": 20
+            }
+          }
+        }
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "as_of",
+        "customers",
+        "policy",
+        "labels"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "1.0.0"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "customers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Context"
+          },
+          "maxItems": 1000
+        },
+        "policy": {
+          "$ref": "#/$defs/Policy"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "customer_id",
+              "expected_segments",
+              "expected_objective",
+              "expected_block_codes"
+            ],
+            "properties": {
+              "customer_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,64}$"
+              },
+              "expected_segments": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "consistent",
+                    "loyalty_candidate",
+                    "declining_activity",
+                    "dormant",
+                    "payment_reminder"
+                  ]
+                },
+                "maxItems": 5
+              },
+              "expected_objective": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "appreciation",
+                      "reward",
+                      "reengagement",
+                      "payment_reminder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "expected_block_codes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "maxItems": 20
+              }
+            }
+          },
+          "maxItems": 1000
+        }
+      }
+    }
+  }
+}

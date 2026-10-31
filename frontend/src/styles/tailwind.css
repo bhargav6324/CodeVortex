@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+/*
+ * LoyaltyAI design tokens. Use these names in components (bg-navy-900, text-brand-600,
+ * from-brand-500 to-violet-500 ...) instead of raw hex values, so every page stays consistent.
+ */
+@theme {
+  --font-sans: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+
+  /* Sidebar navy */
+  --color-navy-950: #090d2b;
+  --color-navy-900: #0e1438;
+  --color-navy-800: #161d4a;
+  --color-navy-700: #222a5e;
+  --color-navy-600: #313a75;
+
+  /* Primary accent: indigo-purple, paired with blue and violet */
+  --color-brand-50: #eef0ff;
+  --color-brand-100: #e0e3ff;
+  --color-brand-200: #c6cbff;
+  --color-brand-300: #a3a9fd;
+  --color-brand-400: #7f84f9;
+  --color-brand-500: #5f5ff2;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+
+  /* App canvas */
+  --color-canvas: #f5f6fb;
+
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
+  --shadow-raised: 0 4px 16px rgb(16 24 40 / 0.08);
+  --shadow-brand: 0 6px 18px rgb(79 70 229 / 0.35);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-slate-900;
+  }
+}
