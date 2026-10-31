@@ -1,0 +1,452 @@
+{
+  "schema_version": "1.0.0",
+  "as_of": "2026-10-31T06:00:00Z",
+  "customers": [
+    {
+      "customer": {
+        "customer_id": "CUST001",
+        "display_name": "Asha",
+        "active_plan": "PLAN_BASIC",
+        "tenure_months": 18,
+        "loyalty_points": 1200,
+        "activity_current_30d": 15,
+        "activity_previous_30d": 15,
+        "last_activity_at": "2026-10-30T06:00:00Z",
+        "timely_payments_last_3": 3
+      },
+      "consent": {
+        "email_allowed": true,
+        "marketing_opt_in": true,
+        "service_email_allowed": true,
+        "recorded_at": "2026-10-01T00:00:00Z",
+        "source": "synthetic_seed"
+      },
+      "billing": {
+        "bill_id": "BILL001",
+        "status": "paid",
+        "amount_due": {
+          "amount_minor": 0,
+          "currency": "INR"
+        },
+        "due_date": "2026-10-15",
+        "verified_at": "2026-10-31T06:00:00Z",
+        "dispute_open": false,
+        "support_text": "Contact support for questions or billing disputes."
+      },
+      "contacts": [],
+      "offers": [
+        {
+          "offer_id": "OFFER100",
+          "title": "Loyalty reward",
+          "terms": "INR 100 reward voucher. Valid for one redemption. No cash alternative.",
+          "terms_version": "terms_v1",
+          "value": {
+            "amount_minor": 10000,
+            "currency": "INR"
+          },
+          "valid_from": "2026-10-01T00:00:00Z",
+          "expires_at": "2026-11-30T23:59:59Z",
+          "channel": "email",
+          "min_loyalty_points": 1000,
+          "min_tenure_months": 12,
+          "allowed_plans": [
+            "PLAN_BASIC"
+          ],
+          "requires_marketing_consent": true
+        }
+      ],
+      "data_version": "data_v1",
+      "as_of": "2026-10-31T06:00:00Z"
+    },
+    {
+      "customer": {
+        "customer_id": "CUST002",
+        "display_name": "Ravi",
+        "active_plan": "PLAN_BASIC",
+        "tenure_months": 3,
+        "loyalty_points": 100,
+        "activity_current_30d": 15,
+        "activity_previous_30d": 15,
+        "last_activity_at": "2026-10-30T06:00:00Z",
+        "timely_payments_last_3": 3
+      },
+      "consent": {
+        "email_allowed": true,
+        "marketing_opt_in": true,
+        "service_email_allowed": true,
+        "recorded_at": "2026-10-01T00:00:00Z",
+        "source": "synthetic_seed"
+      },
+      "billing": {
+        "bill_id": "BILL002",
+        "status": "paid",
+        "amount_due": {
+          "amount_minor": 0,
+          "currency": "INR"
+        },
+        "due_date": "2026-10-15",
+        "verified_at": "2026-10-31T06:00:00Z",
+        "dispute_open": false,
+        "support_text": "Contact support for questions or billing disputes."
+      },
+      "contacts": [],
+      "offers": [
+        {
+          "offer_id": "OFFER100",
+          "title": "Loyalty reward",
+          "terms": "INR 100 reward voucher. Valid for one redemption. No cash alternative.",
+          "terms_version": "terms_v1",
+          "value": {
+            "amount_minor": 10000,
+            "currency": "INR"
+          },
+          "valid_from": "2026-10-01T00:00:00Z",
+          "expires_at": "2026-11-30T23:59:59Z",
+          "channel": "email",
+          "min_loyalty_points": 1000,
+          "min_tenure_months": 12,
+          "allowed_plans": [
+            "PLAN_BASIC"
+          ],
+          "requires_marketing_consent": true
+        }
+      ],
+      "data_version": "data_v1",
+      "as_of": "2026-10-31T06:00:00Z"
+    },
+    {
+      "customer": {
+        "customer_id": "CUST003",
+        "display_name": "Mira",
+        "active_plan": "PLAN_BASIC",
+        "tenure_months": 3,
+        "loyalty_points": 100,
+        "activity_current_30d": 5,
+        "activity_previous_30d": 20,
+        "last_activity_at": "2026-10-30T06:00:00Z",
+        "timely_payments_last_3": 2
+      },
+      "consent": {
+        "email_allowed": true,
+        "marketing_opt_in": true,
+        "service_email_allowed": true,
+        "recorded_at": "2026-10-01T00:00:00Z",
+        "source": "synthetic_seed"
+      },
+      "billing": {
+        "bill_id": "BILL003",
+        "status": "paid",
+        "amount_due": {
+          "amount_minor": 0,
+          "currency": "INR"
+        },
+        "due_date": "2026-10-15",
+        "verified_at": "2026-10-31T06:00:00Z",
+        "dispute_open": false,
+        "support_text": "Contact support for questions or billing disputes."
+      },
+      "contacts": [],
+      "offers": [
+        {
+          "offer_id": "OFFER100",
+          "title": "Loyalty reward",
+          "terms": "INR 100 reward voucher. Valid for one redemption. No cash alternative.",
+          "terms_version": "terms_v1",
+          "value": {
+            "amount_minor": 10000,
+            "currency": "INR"
+          },
+          "valid_from": "2026-10-01T00:00:00Z",
+          "expires_at": "2026-11-30T23:59:59Z",
+          "channel": "email",
+          "min_loyalty_points": 1000,
+          "min_tenure_months": 12,
+          "allowed_plans": [
+            "PLAN_BASIC"
+          ],
+          "requires_marketing_consent": true
+        }
+      ],
+      "data_version": "data_v1",
+      "as_of": "2026-10-31T06:00:00Z"
+    },
+    {
+      "customer": {
+        "customer_id": "CUST004",
+        "display_name": "Dev",
+        "active_plan": "PLAN_BASIC",
+        "tenure_months": 3,
+        "loyalty_points": 100,
+        "activity_current_30d": 0,
+        "activity_previous_30d": 20,
+        "last_activity_at": "2026-09-01T06:00:00Z",
+        "timely_payments_last_3": 2
+      },
+      "consent": {
+        "email_allowed": true,
+        "marketing_opt_in": true,
+        "service_email_allowed": true,
+        "recorded_at": "2026-10-01T00:00:00Z",
+        "source": "synthetic_seed"
+      },
+      "billing": {
+        "bill_id": "BILL004",
+        "status": "paid",
+        "amount_due": {
+          "amount_minor": 0,
+          "currency": "INR"
+        },
+        "due_date": "2026-10-15",
+        "verified_at": "2026-10-31T06:00:00Z",
+        "dispute_open": false,
+        "support_text": "Contact support for questions or billing disputes."
+      },
+      "contacts": [],
+      "offers": [
+        {
+          "offer_id": "OFFER100",
+          "title": "Loyalty reward",
+          "terms": "INR 100 reward voucher. Valid for one redemption. No cash alternative.",
+          "terms_version": "terms_v1",
+          "value": {
+            "amount_minor": 10000,
+            "currency": "INR"
+          },
+          "valid_from": "2026-10-01T00:00:00Z",
+          "expires_at": "2026-11-30T23:59:59Z",
+          "channel": "email",
+          "min_loyalty_points": 1000,
+          "min_tenure_months": 12,
+          "allowed_plans": [
+            "PLAN_BASIC"
+          ],
+          "requires_marketing_consent": true
+        }
+      ],
+      "data_version": "data_v1",
+      "as_of": "2026-10-31T06:00:00Z"
+    },
+    {
+      "customer": {
+        "customer_id": "CUST005",
+        "display_name": "Nila",
+        "active_plan": "PLAN_BASIC",
+        "tenure_months": 3,
+        "loyalty_points": 100,
+        "activity_current_30d": 15,
+        "activity_previous_30d": 15,
+        "last_activity_at": "2026-10-30T06:00:00Z",
+        "timely_payments_last_3": 1
+      },
+      "consent": {
+        "email_allowed": true,
+        "marketing_opt_in": true,
+        "service_email_allowed": true,
+        "recorded_at": "2026-10-01T00:00:00Z",
+        "source": "synthetic_seed"
+      },
+      "billing": {
+        "bill_id": "BILL005",
+        "status": "overdue",
+        "amount_due": {
+          "amount_minor": 149900,
+          "currency": "INR"
+        },
+        "due_date": "2026-10-20",
+        "verified_at": "2026-10-31T06:00:00Z",
+        "dispute_open": false,
+        "support_text": "Contact support for questions or billing disputes."
+      },
+      "contacts": [],
+      "offers": [
+        {
+          "offer_id": "OFFER100",
+          "title": "Loyalty reward",
+          "terms": "INR 100 reward voucher. Valid for one redemption. No cash alternative.",
+          "terms_version": "terms_v1",
+          "value": {
+            "amount_minor": 10000,
+            "currency": "INR"
+          },
+          "valid_from": "2026-10-01T00:00:00Z",
+          "expires_at": "2026-11-30T23:59:59Z",
+          "channel": "email",
+          "min_loyalty_points": 1000,
+          "min_tenure_months": 12,
+          "allowed_plans": [
+            "PLAN_BASIC"
+          ],
+          "requires_marketing_consent": true
+        }
+      ],
+      "data_version": "data_v1",
+      "as_of": "2026-10-31T06:00:00Z"
+    },
+    {
+      "customer": {
+        "customer_id": "CUST006",
+        "display_name": "Kiran",
+        "active_plan": "PLAN_BASIC",
+        "tenure_months": 18,
+        "loyalty_points": 1200,
+        "activity_current_30d": 15,
+        "activity_previous_30d": 15,
+        "last_activity_at": "2026-10-30T06:00:00Z",
+        "timely_payments_last_3": 3
+      },
+      "consent": {
+        "email_allowed": true,
+        "marketing_opt_in": false,
+        "service_email_allowed": true,
+        "recorded_at": "2026-10-01T00:00:00Z",
+        "source": "synthetic_seed"
+      },
+      "billing": {
+        "bill_id": "BILL006",
+        "status": "paid",
+        "amount_due": {
+          "amount_minor": 0,
+          "currency": "INR"
+        },
+        "due_date": "2026-10-15",
+        "verified_at": "2026-10-31T06:00:00Z",
+        "dispute_open": false,
+        "support_text": "Contact support for questions or billing disputes."
+      },
+      "contacts": [],
+      "offers": [
+        {
+          "offer_id": "OFFER100",
+          "title": "Loyalty reward",
+          "terms": "INR 100 reward voucher. Valid for one redemption. No cash alternative.",
+          "terms_version": "terms_v1",
+          "value": {
+            "amount_minor": 10000,
+            "currency": "INR"
+          },
+          "valid_from": "2026-10-01T00:00:00Z",
+          "expires_at": "2026-11-30T23:59:59Z",
+          "channel": "email",
+          "min_loyalty_points": 1000,
+          "min_tenure_months": 12,
+          "allowed_plans": [
+            "PLAN_BASIC"
+          ],
+          "requires_marketing_consent": true
+        }
+      ],
+      "data_version": "data_v1",
+      "as_of": "2026-10-31T06:00:00Z"
+    }
+  ],
+  "policy": {
+    "policy_version": "policy_v1",
+    "template_version": "templates_v1",
+    "loyalty_points_threshold": 1000,
+    "loyalty_tenure_months": 12,
+    "decline_ratio": 0.5,
+    "dormant_days": 30,
+    "firm_after_days": 15,
+    "max_contacts_7d": 2,
+    "dedupe_days": 7,
+    "billing_max_age_hours": 24,
+    "required_disclaimer": "Terms apply. This is a draft for human review.",
+    "blocked_phrases": [
+      "legal action",
+      "disconnect immediately",
+      "guaranteed savings"
+    ],
+    "templates": [
+      {
+        "template_id": "reward_v1",
+        "objective": "reward",
+        "tone": "warm",
+        "subject": "Thank you for your loyalty",
+        "body": "Hello {display_name},\nThank you for being with us for {tenure_months} months. You are eligible for our {offer_title}: {offer_terms} Offer expires {offer_expiry_date}.\n{required_disclaimer}\n{support_text}"
+      },
+      {
+        "template_id": "appreciation_v1",
+        "objective": "appreciation",
+        "tone": "warm",
+        "subject": "Thank you for staying engaged",
+        "body": "Hello {display_name},\nThank you for staying engaged with us.\n{required_disclaimer}\n{support_text}"
+      },
+      {
+        "template_id": "reengagement_v1",
+        "objective": "reengagement",
+        "tone": "encouraging",
+        "subject": "We would like to hear from you",
+        "body": "Hello {display_name},\nWe would like to help you get more from your current plan. Contact support to explore your options.\n{required_disclaimer}\n{support_text}"
+      },
+      {
+        "template_id": "courteous_v1",
+        "objective": "payment_reminder",
+        "tone": "courteous",
+        "subject": "A reminder about your bill",
+        "body": "Hello {display_name},\nOur verified records show {amount_due} due on {due_date}. If you have already paid or wish to dispute this bill, please contact support.\n{required_disclaimer}\n{support_text}"
+      },
+      {
+        "template_id": "firm_v1",
+        "objective": "payment_reminder",
+        "tone": "firm_respectful",
+        "subject": "Please review your overdue bill",
+        "body": "Hello {display_name},\nYour bill for {amount_due}, due on {due_date}, remains overdue in our verified records. Please review it and contact support if you need help, have paid, or wish to dispute the amount.\n{required_disclaimer}\n{support_text}"
+      }
+    ]
+  },
+  "labels": [
+    {
+      "customer_id": "CUST001",
+      "expected_segments": [
+        "loyalty_candidate",
+        "consistent"
+      ],
+      "expected_objective": "reward",
+      "expected_block_codes": []
+    },
+    {
+      "customer_id": "CUST002",
+      "expected_segments": [
+        "consistent"
+      ],
+      "expected_objective": "appreciation",
+      "expected_block_codes": []
+    },
+    {
+      "customer_id": "CUST003",
+      "expected_segments": [
+        "declining_activity"
+      ],
+      "expected_objective": "reengagement",
+      "expected_block_codes": []
+    },
+    {
+      "customer_id": "CUST004",
+      "expected_segments": [
+        "dormant",
+        "declining_activity"
+      ],
+      "expected_objective": "reengagement",
+      "expected_block_codes": []
+    },
+    {
+      "customer_id": "CUST005",
+      "expected_segments": [
+        "payment_reminder"
+      ],
+      "expected_objective": "payment_reminder",
+      "expected_block_codes": []
+    },
+    {
+      "customer_id": "CUST006",
+      "expected_segments": [
+        "loyalty_candidate",
+        "consistent"
+      ],
+      "expected_objective": "appreciation",
+      "expected_block_codes": [
+        "CONSENT_REQUIRED"
+      ]
+    }
+  ]
+}

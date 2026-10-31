@@ -1,0 +1,12 @@
+**/memory/
+**/AGENTS.md
+**/.venv/
+**/.env
+**/.env.*
+!**/.env.example
+**/__pycache__/
+**/.pytest_cache/
+*.pyc
+*.db
+*.sqlite*
+/backend/data/

@@ -1,0 +1,83 @@
+[
+  {
+    "draft_id": "DRAFT001",
+    "customer_id": "CUST001",
+    "revision": 1,
+    "status": "ready_for_review",
+    "segments": [
+      {
+        "code": "loyalty_candidate",
+        "reason_codes": [
+          "LOYALTY_THRESHOLD"
+        ],
+        "confidence": 1,
+        "evidence": [
+          {
+            "field": "customer.loyalty_points",
+            "value": 1200
+          },
+          {
+            "field": "customer.tenure_months",
+            "value": 18
+          }
+        ]
+      },
+      {
+        "code": "consistent",
+        "reason_codes": [
+          "TIMELY_PAYMENT"
+        ],
+        "confidence": 1,
+        "evidence": [
+          {
+            "field": "customer.timely_payments_last_3",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "strategy": {
+      "objective": "reward",
+      "tone": "warm",
+      "template_id": "reward_v1",
+      "reminder_stage": "none"
+    },
+    "selected_offer_id": "OFFER100",
+    "message": {
+      "subject": "Thank you for your loyalty",
+      "body": "Hello Asha,\nThank you for being with us for 18 months. You are eligible for our Loyalty reward: INR 100 reward voucher. Valid for one redemption. No cash alternative. Offer expires 2026-11-30.\nTerms apply. This is a draft for human review.\nContact support for questions or billing disputes."
+    },
+    "evidence": [
+      {
+        "field": "customer.loyalty_points",
+        "value": 1200
+      },
+      {
+        "field": "customer.tenure_months",
+        "value": 18
+      }
+    ],
+    "validation": {
+      "passed": true,
+      "findings": [],
+      "checked_at": "2026-10-31T06:00:00Z",
+      "validator_version": "validator_v1"
+    },
+    "versions": {
+      "policy_version": "policy_v1",
+      "template_version": "templates_v1",
+      "prompt_version": "fixture_v1",
+      "model_version": "fixture_not_invoked",
+      "data_version": "data_v1"
+    },
+    "campaign_key": "reward_OFFER100_terms_v1",
+    "created_at": "2026-10-31T06:00:00Z",
+    "updated_at": "2026-10-31T06:00:00Z",
+    "approved_by": null,
+    "approved_at": null,
+    "send_status": "not_sent",
+    "delivery_id": null,
+    "feedback": null,
+    "request_id": "REQ001"
+  }
+]
